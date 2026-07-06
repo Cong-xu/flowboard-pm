@@ -1,5 +1,11 @@
 # FlowBoard PM release notes
 
+## 0.1.1
+
+- Added board-level project configuration.
+- Project chips now use configured project colors.
+- Board title and description can be edited from the top toolbar.
+
 ## 0.1.0
 
 Initial release.
@@ -18,5 +24,4 @@ Initial release.
 - `styles.css`
 - `README.md`
 - `versions.json`
-- GitHub release tag matching `manifest.json` version: `0.1.0`
-
+- GitHub release tag matching `manifest.json` version: `0.1.1`

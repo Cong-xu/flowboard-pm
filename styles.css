@@ -59,6 +59,8 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .pmk-search {
@@ -349,3 +351,26 @@
   grid-column: 1 / -1;
 }
 
+.pmk-modal-grid textarea {
+  min-height: 150px;
+  resize: vertical;
+  font-family: var(--font-monospace);
+  line-height: 1.5;
+}
+
+.pmk-help {
+  margin: 0 0 14px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.pmk-project-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 10px;
+  border: 1px solid var(--pmk-border);
+  border-radius: 10px;
+  background: var(--background-secondary);
+}

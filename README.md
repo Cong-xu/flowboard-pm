@@ -9,6 +9,7 @@ FlowBoard PM is a lightweight project-management board for Obsidian. It provides
 - Local `.pmboard` files.
 - Backlog, Todo, In Progress, and Done lanes.
 - Cards with title, context, project, owner, stage, type, priority, due date, and tags.
+- Project configuration for project name, color, owner, and description.
 - Drag-and-drop status updates with automatic saving.
 - Card search.
 - Create, edit, and delete cards.
@@ -24,6 +25,17 @@ FlowBoard PM is a lightweight project-management board for Obsidian. It provides
 ## Data
 
 FlowBoard PM stores board data in plain local `.pmboard` files inside your vault. The plugin does not require an external service.
+
+## Project Configuration
+
+Use the `项目配置` button at the top of a board to edit board-level project metadata.
+
+Project format:
+
+```text
+MT | #13a38b | Justin | 门店与运维相关项目
+AI | #f5b700 | Justin | AI 自动化与数据处理
+```
 
 ## Author
 

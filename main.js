@@ -8,6 +8,11 @@ const DEFAULT_BOARD = {
   version: 1,
   title: "项目看板",
   description: "轻量项目管理看板",
+  projects: [
+    { name: "MT", color: "#13a38b", owner: "Justin", description: "门店与运维相关项目" },
+    { name: "AI", color: "#f5b700", owner: "Justin", description: "AI 自动化与数据处理" },
+    { name: "ITR", color: "#5b6ee1", owner: "Justin", description: "ITR 交付与系统建设" }
+  ],
   lanes: [
     { id: "backlog", title: "Backlog", status: "backlog", cards: [] },
     { id: "todo", title: "Todo", status: "todo", cards: [] },
@@ -207,6 +212,17 @@ class PMKanbanView extends ItemView {
     });
 
     const actions = toolbar.createDiv({ cls: "pmk-actions" });
+    const configButton = actions.createEl("button", { cls: "pmk-btn", text: "项目配置" });
+    configButton.addEventListener("click", () => {
+      new ProjectConfigModal(this.app, this.board, async (updated) => {
+        this.board.title = updated.title;
+        this.board.description = updated.description;
+        this.board.projects = updated.projects;
+        await this.saveBoard();
+        this.render();
+      }).open();
+    });
+
     const search = actions.createEl("input", {
       cls: "pmk-search",
       attr: { type: "search", placeholder: "搜索卡片、项目、标签" }
@@ -314,7 +330,12 @@ class PMKanbanView extends ItemView {
     title.createSpan({ text: card.title || "未命名卡片" });
 
     const footer = cardEl.createDiv({ cls: "pmk-card-footer" });
-    if (card.project) footer.createSpan({ cls: "pmk-chip project", text: card.project });
+    const projectMeta = getProjectMeta(this.board, card.project);
+    if (card.project) {
+      const chip = footer.createSpan({ cls: "pmk-chip project", text: card.project });
+      chip.style.setProperty("--pmk-chip-color", projectMeta.color);
+      chip.title = projectMeta.description || projectMeta.owner || card.project;
+    }
     if (card.owner) footer.createSpan({ cls: "pmk-chip owner", text: card.owner });
     if (card.stage) footer.createSpan({ cls: "pmk-chip", text: card.stage });
     if (card.type) footer.createSpan({ cls: "pmk-chip", text: card.type });
@@ -331,6 +352,65 @@ class PMKanbanView extends ItemView {
       const matched = !this.query || card.dataset.search.includes(this.query);
       card.toggleClass("is-hidden", !matched);
     }
+  }
+}
+
+class ProjectConfigModal extends Modal {
+  constructor(app, board, onSubmit) {
+    super(app);
+    this.board = board;
+    this.onSubmit = onSubmit;
+  }
+
+  onOpen() {
+    const { contentEl } = this;
+    contentEl.empty();
+    contentEl.createEl("h2", { text: "项目配置" });
+    contentEl.createEl("p", {
+      cls: "pmk-help",
+      text: "维护看板标题、说明和项目列表。项目格式：项目名 | 颜色 | 负责人 | 说明"
+    });
+
+    const grid = contentEl.createDiv({ cls: "pmk-modal-grid" });
+    const title = addText(grid, "看板标题", this.board.title || "项目看板");
+    const description = addText(grid, "看板说明", this.board.description || "");
+
+    const projectWrapper = grid.createDiv({ cls: "pmk-modal-wide" });
+    const projectSetting = new Setting(projectWrapper).setName("项目列表");
+    let projectText;
+    projectSetting.addTextArea((text) => {
+      projectText = text.inputEl;
+      projectText.rows = 8;
+      projectText.value = projectsToText(this.board.projects);
+      projectText.placeholder = "MT | #13a38b | Justin | 门店与运维相关项目";
+    });
+
+    const preview = contentEl.createDiv({ cls: "pmk-project-preview" });
+    const renderPreview = () => {
+      preview.empty();
+      for (const project of parseProjects(projectText.value)) {
+        const chip = preview.createSpan({ cls: "pmk-chip project", text: project.name });
+        chip.style.setProperty("--pmk-chip-color", project.color);
+        chip.title = project.description || project.owner || project.name;
+      }
+    };
+    projectText.addEventListener("input", renderPreview);
+    renderPreview();
+
+    const buttons = contentEl.createDiv({ cls: "modal-button-container" });
+    const saveButton = buttons.createEl("button", { text: "保存配置", cls: "mod-cta" });
+    saveButton.addEventListener("click", async () => {
+      await this.onSubmit({
+        title: title.value.trim() || "项目看板",
+        description: description.value.trim(),
+        projects: parseProjects(projectText.value)
+      });
+      this.close();
+    });
+  }
+
+  onClose() {
+    this.contentEl.empty();
   }
 }
 
@@ -405,6 +485,15 @@ function addText(container, name, value, cls) {
 
 function normalizeBoard(board) {
   const next = { ...cloneBoard(DEFAULT_BOARD), ...board };
+  next.projects = Array.isArray(board.projects) ? board.projects : cloneBoard(DEFAULT_BOARD).projects;
+  next.projects = next.projects
+    .map((project) => ({
+      name: String(project.name || "").trim(),
+      color: normalizeColor(project.color),
+      owner: String(project.owner || "").trim(),
+      description: String(project.description || "").trim()
+    }))
+    .filter((project) => project.name);
   next.lanes = Array.isArray(board.lanes) && board.lanes.length ? board.lanes : cloneBoard(DEFAULT_BOARD).lanes;
   for (const lane of next.lanes) {
     lane.id = lane.id || createId();
@@ -421,6 +510,45 @@ function normalizeBoard(board) {
 
 function cloneBoard(board) {
   return JSON.parse(JSON.stringify(board));
+}
+
+function projectsToText(projects) {
+  const list = Array.isArray(projects) && projects.length ? projects : cloneBoard(DEFAULT_BOARD).projects;
+  return list.map((project) => [
+    project.name || "",
+    project.color || "#13a38b",
+    project.owner || "",
+    project.description || ""
+  ].join(" | ")).join("\n");
+}
+
+function parseProjects(value) {
+  return String(value || "")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const [name, color, owner, ...descriptionParts] = line.split("|").map((part) => part.trim());
+      return {
+        name,
+        color: normalizeColor(color),
+        owner: owner || "",
+        description: descriptionParts.join(" | ").trim()
+      };
+    })
+    .filter((project) => project.name);
+}
+
+function getProjectMeta(board, projectName) {
+  const fallback = { name: projectName || "", color: "#13a38b", owner: "", description: "" };
+  if (!projectName || !Array.isArray(board.projects)) return fallback;
+  return board.projects.find((project) => project.name === projectName) || fallback;
+}
+
+function normalizeColor(color) {
+  const value = String(color || "").trim();
+  if (/^#[0-9a-f]{3}([0-9a-f]{3})?$/i.test(value)) return value;
+  return "#13a38b";
 }
 
 function addCardToBoard(board, laneId, card) {
