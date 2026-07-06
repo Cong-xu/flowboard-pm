@@ -1,0 +1,10 @@
+{
+  "id": "flowboard-pm",
+  "name": "FlowBoard PM",
+  "version": "0.1.0",
+  "minAppVersion": "1.4.0",
+  "description": "A lightweight project-management board with Linear-style columns, cards, tags, drag-and-drop, and local board files.",
+  "author": "Conan Local",
+  "authorUrl": "",
+  "isDesktopOnly": false
+}
