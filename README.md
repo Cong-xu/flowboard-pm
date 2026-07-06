@@ -1,19 +1,30 @@
 # FlowBoard PM
 
-这是一个 Obsidian 项目看板插件，用于管理需求、任务、阶段和交付状态。
+FlowBoard PM is a lightweight project-management board for Obsidian. It provides Linear-style lanes, cards, tags, drag-and-drop status changes, and local `.pmboard` files.
 
-## 当前能力
+它适合在 Obsidian 中管理需求、任务、阶段和交付状态。
 
-- 使用 `.pmboard` 文件保存看板数据。
-- 支持 Backlog、Todo、In Progress、Done 等列。
-- 支持卡片标题、上下文、项目、负责人、阶段、类型、优先级、截止日期和标签。
-- 支持拖拽卡片改变状态，并自动保存。
-- 支持搜索卡片。
-- 支持新增、编辑、删除卡片。
-- 提供命令创建空看板和示例看板。
+## Features
 
-## 使用方式
+- Local `.pmboard` files.
+- Backlog, Todo, In Progress, and Done lanes.
+- Cards with title, context, project, owner, stage, type, priority, due date, and tags.
+- Drag-and-drop status updates with automatic saving.
+- Card search.
+- Create, edit, and delete cards.
+- Commands for creating a blank board or sample board.
 
-1. 在 Obsidian 设置中启用 `FlowBoard PM`。
-2. 使用命令面板执行“创建 FlowBoard PM 示例看板”。
-3. 打开 `5.项目管理/自定义看板/示例项目看板.pmboard`。
+## Usage
+
+1. Enable `FlowBoard PM` in Obsidian community plugins.
+2. Open the command palette.
+3. Run `创建 FlowBoard PM 示例看板` or `创建 FlowBoard PM 看板`.
+4. Open the created `.pmboard` file.
+
+## Data
+
+FlowBoard PM stores board data in plain local `.pmboard` files inside your vault. The plugin does not require an external service.
+
+## Author
+
+Created by [Cong-xu](https://github.com/Cong-xu).
